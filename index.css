@@ -1,0 +1,36 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.root {
+  width: 210px;
+  height: 210px;
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  margin-top: 100px;
+}
+
+.row {
+  display: flex;
+}
+
+.box {
+  border: 1px solid;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box.red {
+  background-color: red;
+}
+
+.box.black {
+  background-color: black;
+}
