@@ -224,7 +224,7 @@ const moveRedBox = (event) => {
   };
 
   if (eventActions?.[event.code]) {
-    event.preventDefault();
+    event?.preventDefault?.();
     eventActions[event.code]();
   }
 };
@@ -232,6 +232,16 @@ const moveRedBox = (event) => {
 const moveControl = () => {
   document.removeEventListener("keydown", moveRedBox);
   document.addEventListener("keydown", moveRedBox);
+
+  const buttonToTop = document.querySelector(".button-to-top");
+  const buttonToDown = document.querySelector(".button-to-down");
+  const buttonToLeft = document.querySelector(".button-to-left");
+  const buttonToRight = document.querySelector(".button-to-right");
+
+  buttonToTop.onclick = () => moveRedBox({ code: "ArrowUp" });
+  buttonToDown.onclick = () => moveRedBox({ code: "ArrowDown" });
+  buttonToLeft.onclick = () => moveRedBox({ code: "ArrowLeft" });
+  buttonToRight.onclick = () => moveRedBox({ code: "ArrowRight" });
 };
 
 const render = () => {

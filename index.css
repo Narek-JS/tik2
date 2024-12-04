@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 30px;
 }
 
 .row {
@@ -34,4 +34,39 @@
 
 .box.black {
   background-color: black;
+}
+
+.container {
+  position: relative;
+  width: 165px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.container svg {
+  max-width: 50px;
+  max-height: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.container svg:active {
+  transform: translateY(3px);
+}
+
+.button-to-left {
+  left: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+.button-to-right {
+  right: 0;
+  bottom: 0;
+  position: absolute;
 }
