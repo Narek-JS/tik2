@@ -26,7 +26,7 @@ class Board {
       const columnIndexForBlack = Math.floor(Math.random() * 6);
 
       const rowIsSameWithRed = redPosition[0] === rowIndexForBlack;
-      const columnIsSameWithRed = redPosition[0] === columnIndexForBlack;
+      const columnIsSameWithRed = redPosition[1] === columnIndexForBlack;
       const isSameBoxWithRed = rowIsSameWithRed && columnIsSameWithRed;
 
       const hasBlack = result.find(
@@ -77,7 +77,89 @@ class Board {
 
 const board = new Board();
 
-const moveBlacksPositions = () => {};
+const getBlackBoxPositions = () => {
+  const blackBoxes = [];
+
+  board.forEach((row, rowIndex) => {
+    row.forEach((box, columnIndex) => {
+      if (box === "black") {
+        blackBoxes.push([rowIndex, columnIndex]);
+      }
+    });
+  });
+
+  return blackBoxes;
+};
+
+const getNearestPositionIntoRed = (blackPosition) => {
+  const [blackRowIndex, blackColumnIndex] = blackPosition;
+  const [redRowIndex, redColumnIndex] = getRedBoxPosition();
+
+  let nextRow = blackRowIndex;
+  let nextCol = blackColumnIndex;
+
+  if (blackRowIndex < redRowIndex) {
+    nextRow = blackRowIndex + 1;
+  } else if (blackRowIndex > redRowIndex) {
+    nextRow = blackRowIndex - 1;
+  }
+
+  if (blackColumnIndex < redColumnIndex) {
+    nextCol = blackColumnIndex + 1;
+  } else if (blackColumnIndex > redColumnIndex) {
+    nextCol = blackColumnIndex - 1;
+  }
+
+  const canMoveUp =
+    redRowIndex > 0 && board[redRowIndex - 1]?.[redColumnIndex] === "";
+  const canMoveDown =
+    redRowIndex < 5 && board[redRowIndex + 1]?.[redColumnIndex] === "";
+
+  if (canMoveUp || canMoveDown) {
+    if (blackRowIndex < redRowIndex) {
+      nextRow = redRowIndex - 1;
+    } else if (blackRowIndex > redRowIndex) {
+      nextRow = redRowIndex + 1;
+    }
+  }
+
+  if (board[nextRow]?.[nextCol] === "") {
+    return [nextRow, nextCol];
+  }
+
+  if (board[nextRow]?.[blackColumnIndex] === "") {
+    return [nextRow, blackColumnIndex];
+  }
+  if (board[blackRowIndex]?.[nextCol] === "") {
+    return [blackRowIndex, nextCol];
+  }
+
+  return [blackRowIndex, blackColumnIndex];
+};
+
+const moveBlacksPositions = () => {
+  const blackBoxes = getBlackBoxPositions();
+
+  const nearestPositionFor1 = getNearestPositionIntoRed(blackBoxes[0]);
+  board[blackBoxes[0][0]][blackBoxes[0][1]] = "";
+  board[nearestPositionFor1[0]][nearestPositionFor1[1]] = "black";
+  render();
+
+  const nearestPositionFor2 = getNearestPositionIntoRed(blackBoxes[1]);
+  board[blackBoxes[1][0]][blackBoxes[1][1]] = "";
+  board[nearestPositionFor2[0]][nearestPositionFor2[1]] = "black";
+  render();
+
+  const nearestPositionFor3 = getNearestPositionIntoRed(blackBoxes[2]);
+  board[blackBoxes[2][0]][blackBoxes[2][1]] = "";
+  board[nearestPositionFor3[0]][nearestPositionFor3[1]] = "black";
+  render();
+
+  const nearestPositionFor4 = getNearestPositionIntoRed(blackBoxes[3]);
+  board[blackBoxes[3][0]][blackBoxes[3][1]] = "";
+  board[nearestPositionFor4[0]][nearestPositionFor4[1]] = "black";
+  render();
+};
 
 const getRedBoxPosition = () => {
   return board.reduce((acc, row, rowIndex) => {
@@ -99,8 +181,8 @@ const moveRedBox = (event) => {
     if (board[currentMovedPosition[0]][currentMovedPosition[1]] === "") {
       board[redPosition[0]][redPosition[1]] = "";
       board[currentMovedPosition[0]][currentMovedPosition[1]] = "red";
-      moveBlacksPositions();
       render();
+      moveBlacksPositions();
     }
   };
 
@@ -109,8 +191,8 @@ const moveRedBox = (event) => {
     if (board[currentMovedPosition[0]][currentMovedPosition[1]] === "") {
       board[redPosition[0]][redPosition[1]] = "";
       board[currentMovedPosition[0]][currentMovedPosition[1]] = "red";
-      moveBlacksPositions();
       render();
+      moveBlacksPositions();
     }
   };
 
@@ -119,8 +201,8 @@ const moveRedBox = (event) => {
     if (board[currentMovedPosition[0]][currentMovedPosition[1]] === "") {
       board[redPosition[0]][redPosition[1]] = "";
       board[currentMovedPosition[0]][currentMovedPosition[1]] = "red";
-      moveBlacksPositions();
       render();
+      moveBlacksPositions();
     }
   };
 
@@ -129,8 +211,8 @@ const moveRedBox = (event) => {
     if (board[currentMovedPosition[0]][currentMovedPosition[1]] === "") {
       board[redPosition[0]][redPosition[1]] = "";
       board[currentMovedPosition[0]][currentMovedPosition[1]] = "red";
-      moveBlacksPositions();
       render();
+      moveBlacksPositions();
     }
   };
 
