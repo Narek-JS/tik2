@@ -1,4 +1,5 @@
 const root = document.querySelector(".root");
+let blackBoxMovingStatus = false;
 
 class Board {
   constructor() {
@@ -18,40 +19,57 @@ class Board {
     return randomIndexesTwoStartRed[redPositionIndex];
   }
 
-  #getBlackPositions(redPosition) {
-    const result = [];
+  #getBlackPositions([redRow, redCol]) {
+    const boardSize = 6;
+    const mid = Math.floor(boardSize / 2);
 
-    function loop() {
-      const rowIndexForBlack = Math.floor(Math.random() * 6);
-      const columnIndexForBlack = Math.floor(Math.random() * 6);
+    const rowOffset = redRow === 0 ? boardSize - 1 : 0;
+    const colOffset = redCol === 0 ? boardSize - 1 : 0;
 
-      const rowIsSameWithRed = redPosition[0] === rowIndexForBlack;
-      const columnIsSameWithRed = redPosition[1] === columnIndexForBlack;
-      const isSameBoxWithRed = rowIsSameWithRed && columnIsSameWithRed;
-
-      const hasBlack = result.find(
-        ([keptRowIndexForBlack, keptColumnIndexForBlack]) => {
-          return (
-            keptRowIndexForBlack === rowIndexForBlack &&
-            keptColumnIndexForBlack === columnIndexForBlack
-          );
-        }
-      );
-
-      if (result.length === 4) {
-        return result;
-      }
-
-      if (isSameBoxWithRed || hasBlack) {
-        return loop();
-      } else {
-        result.push([rowIndexForBlack, columnIndexForBlack]);
-        return loop();
-      }
-    }
-
-    return loop();
+    return [
+      [rowOffset, mid - 1],
+      [rowOffset, mid],
+      [mid - 1, colOffset],
+      [mid, colOffset],
+    ];
   }
+
+  // Random black Box logic.
+
+  // #getBlackPositions(redPosition) {
+  //   const result = [];
+
+  //   function loop() {
+  //     const rowIndexForBlack = Math.floor(Math.random() * 6);
+  //     const columnIndexForBlack = Math.floor(Math.random() * 6);
+
+  //     const rowIsSameWithRed = redPosition[0] === rowIndexForBlack;
+  //     const columnIsSameWithRed = redPosition[1] === columnIndexForBlack;
+  //     const isSameBoxWithRed = rowIsSameWithRed && columnIsSameWithRed;
+
+  //     const hasBlack = result.find(
+  //       ([keptRowIndexForBlack, keptColumnIndexForBlack]) => {
+  //         return (
+  //           keptRowIndexForBlack === rowIndexForBlack &&
+  //           keptColumnIndexForBlack === columnIndexForBlack
+  //         );
+  //       }
+  //     );
+
+  //     if (result.length === 4) {
+  //       return result;
+  //     }
+
+  //     if (isSameBoxWithRed || hasBlack) {
+  //       return loop();
+  //     } else {
+  //       result.push([rowIndexForBlack, columnIndexForBlack]);
+  //       return loop();
+  //     }
+  //   }
+
+  //   return loop();
+  // }
 
   #init() {
     const board = [
@@ -92,73 +110,59 @@ const getBlackBoxPositions = () => {
 };
 
 const getNearestPositionIntoRed = (blackPosition) => {
-  const [blackRowIndex, blackColumnIndex] = blackPosition;
-  const [redRowIndex, redColumnIndex] = getRedBoxPosition();
+  const [blackRow, blackCol] = blackPosition;
+  const [redRow, redCol] = getRedBoxPosition();
 
-  let nextRow = blackRowIndex;
-  let nextCol = blackColumnIndex;
+  const possibleMoves = [
+    [blackRow - 1, blackCol],
+    [blackRow + 1, blackCol],
+    [blackRow, blackCol - 1],
+    [blackRow, blackCol + 1],
+  ];
 
-  if (blackRowIndex < redRowIndex) {
-    nextRow = blackRowIndex + 1;
-  } else if (blackRowIndex > redRowIndex) {
-    nextRow = blackRowIndex - 1;
+  const validMoves = possibleMoves.filter(([row, col]) => {
+    return row >= 0 && col >= 0 && row < 6 && col < 6 && board[row][col] === "";
+  });
+
+  if (validMoves.length === 0) {
+    return [blackRow, blackCol];
   }
 
-  if (blackColumnIndex < redColumnIndex) {
-    nextCol = blackColumnIndex + 1;
-  } else if (blackColumnIndex > redColumnIndex) {
-    nextCol = blackColumnIndex - 1;
-  }
+  return validMoves.reduce((bestMove, currentMove) => {
+    const [currentRow, currentCol] = currentMove;
+    const [bestRow, bestCol] = bestMove;
 
-  const canMoveUp =
-    redRowIndex > 0 && board[redRowIndex - 1]?.[redColumnIndex] === "";
-  const canMoveDown =
-    redRowIndex < 5 && board[redRowIndex + 1]?.[redColumnIndex] === "";
+    const currentDistance =
+      Math.abs(currentRow - redRow) + Math.abs(currentCol - redCol);
+    const bestDistance =
+      Math.abs(bestRow - redRow) + Math.abs(bestCol - redCol);
 
-  if (canMoveUp || canMoveDown) {
-    if (blackRowIndex < redRowIndex) {
-      nextRow = redRowIndex - 1;
-    } else if (blackRowIndex > redRowIndex) {
-      nextRow = redRowIndex + 1;
-    }
-  }
-
-  if (board[nextRow]?.[nextCol] === "") {
-    return [nextRow, nextCol];
-  }
-
-  if (board[nextRow]?.[blackColumnIndex] === "") {
-    return [nextRow, blackColumnIndex];
-  }
-  if (board[blackRowIndex]?.[nextCol] === "") {
-    return [blackRowIndex, nextCol];
-  }
-
-  return [blackRowIndex, blackColumnIndex];
+    return currentDistance < bestDistance ? currentMove : bestMove;
+  }, validMoves[0]);
 };
 
 const moveBlacksPositions = () => {
+  blackBoxMovingStatus = true;
+
   const blackBoxes = getBlackBoxPositions();
 
-  const nearestPositionFor1 = getNearestPositionIntoRed(blackBoxes[0]);
-  board[blackBoxes[0][0]][blackBoxes[0][1]] = "";
-  board[nearestPositionFor1[0]][nearestPositionFor1[1]] = "black";
-  render();
+  blackBoxes.forEach((blackBox, index) => {
+    setTimeout(() => {
+      const [currentRow, currentCol] = blackBox;
+      const newPosition = getNearestPositionIntoRed(blackBox);
 
-  const nearestPositionFor2 = getNearestPositionIntoRed(blackBoxes[1]);
-  board[blackBoxes[1][0]][blackBoxes[1][1]] = "";
-  board[nearestPositionFor2[0]][nearestPositionFor2[1]] = "black";
-  render();
+      if (newPosition[0] !== currentRow || newPosition[1] !== currentCol) {
+        board[currentRow][currentCol] = "";
+        board[newPosition[0]][newPosition[1]] = "black";
+      }
 
-  const nearestPositionFor3 = getNearestPositionIntoRed(blackBoxes[2]);
-  board[blackBoxes[2][0]][blackBoxes[2][1]] = "";
-  board[nearestPositionFor3[0]][nearestPositionFor3[1]] = "black";
-  render();
+      if (index === blackBoxes.length - 1) {
+        blackBoxMovingStatus = false;
+      }
 
-  const nearestPositionFor4 = getNearestPositionIntoRed(blackBoxes[3]);
-  board[blackBoxes[3][0]][blackBoxes[3][1]] = "";
-  board[nearestPositionFor4[0]][nearestPositionFor4[1]] = "black";
-  render();
+      render();
+    }, 200 * (index + 1)); // Delay each move for better visualization
+  });
 };
 
 const getRedBoxPosition = () => {
@@ -174,6 +178,8 @@ const getRedBoxPosition = () => {
 };
 
 const moveRedBox = (event) => {
+  if (blackBoxMovingStatus) return;
+
   const redPosition = getRedBoxPosition();
 
   const goToDown = () => {

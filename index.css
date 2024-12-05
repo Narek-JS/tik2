@@ -28,11 +28,19 @@
   justify-content: center;
 }
 
-.box.red {
+.box.red::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
   background-color: red;
 }
 
-.box.black {
+.box.black::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
   background-color: black;
 }
 
